@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>data demo</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="jQuery_3_7_1/jquery-3.7.1.min.js"></script> 
+</head>
+<body>
+<div id="focus">
+    <div>Sistema di riferimento:<spa id="ref"></spa></div>
+    <div>Semiasse maggiore dell'orbita:<spa id="Sma"></spa></div>
+    <div>Eccentricità:<spa id="Ecc"></spa></div>
+    <div>Inclinazione:<spa id="Inc"></spa></div>
+    <div>Periodo orbitale:<spa id="T"></spa></div>
+    <div>Tempo allla Periapsi:<spa id="PeT"></spa></div>
+    <div>Tempo alla Apoapsi:<spa id="ApT"></spa></div>
+</div>
+<div id="ISS">
+    <div>Sistema di riferimento:<spa id="ref"></spa></div>
+    <div>Semiasse maggiore dell'orbita:<spa id="Sma"></spa></div>
+    <div>Eccentricità:<spa id="Ecc"></spa></div>
+    <div>Inclinazione:<spa id="Inc"></spa></div>
+    <div>Periodo orbitale:<spa id="T"></spa></div>
+    <div>Tempo allla Periapsi:<spa id="PeT"></spa></div>
+    <div>Tempo alla Apoapsi:<spa id="ApT"></spa></div>
+</div>
+</body>
+    
+<script lang="javascript">
+    var orbitalElements=[
+    {param:"ref",value:null},
+    {param:"Sma",value:null},
+    {param:"Ecc",value:null},
+    {param:"Inc",value:null},
+    {param:"LAN",value:null},
+    {param:"LPe",value:null},
+    {param:"MnL",value:null},
+    {param:"unknow1",value:null},
+    {param:"unknow2",value:null},
+    {param:"Smi",value:null},
+    {param:"PeR",value:null},
+    {param:"ApR",value:null},
+    {param:"MnA",value:null},
+    {param:"TrA",value:null},
+    {param:"MnL",value:null},
+    {param:"TrL",value:null},
+    {param:"Mna",value:null},
+    {param:"MnL",value:null},
+    {param:"T",value:null},
+    {param:"PeT",value:null},
+    {param:"ApT",value:null}
+];
+    setInterval(()=>{
+        //console.log("passa");
+        jQuery.get("http://localhost:8080/parametro/p",function(data, status){ //ho dovuto mettere l'ip per usarlo da raspberry
+            //console.log(data);
+            orbiterCommand=data.substring(0, data.indexOf("="));//prende la parte sinistra di data fino a =
+            orbiterData=data.substring(data.indexOf("=")+1,data.length);
+            //console.log(command);
+            switch (orbiterCommand){
+                case "nav:focus:elements2" :
+                    orbitMFD("focus");       
+                    break;
+                case "nav:iss:elements2" :
+                    orbitMFD("ISS");
+                    break;
+
+                //continuare qui        
+
+            }
+            
+        });
+    
+    
+    
+    },100);
+    
+
+    function conversioneTempo(valore){
+        ora= Math.floor(valore/3600)
+        console.log(ora);
+        minuti=Math.floor((valore-(ora*3600))/60);
+        console.log(minuti);
+        secondi=valore-(ora*3600)-(minuti*60);
+        console.log(secondi);
+        return ora+":"+minuti+":"+secondi;
+
+    }
+    
+    function orbitMFD(ship){
+    orbiterDataArray=orbiterData.split(",");
+    for(let i=0;i<orbiterDataArray.length;i++){
+        //console.log(i);
+        orbitalElements[i].value=orbiterDataArray[i];
+        if(orbitalElements[i].param=="ApT" || orbitalElements[i].param=="PeT" || orbitalElements[i].param=="T"){
+           orbitalElements[i].value=conversioneTempo(orbitalElements[i].value);
+        }
+        if(orbitalElements[i].param=="Sma"){
+            orbitalElements[i].value=orbitalElements[i].value/1000+" Km";
+        }
+        jQuery("#"+ship).find("#"+orbitalElements[i].param).text(orbitalElements[i].value);
+        //jQuery("#"+orbitalElements[i].param).text(orbitalElements[i].value);
+
+    }
+    //console.log(orbitalElements)
+    }
+    </script>
+
+    </html>
